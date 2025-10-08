@@ -26,7 +26,6 @@ phase_colors = {
     2: "#d62728",
     3: "#8c564b"
 }
-phase_order = [1,2,3]
 
 st.write("Er zijn diverse onderdelen waarnaar gekeken kan worden, zoals wanneer er geladen wordt, hoe veel er geladen wordt en wat de verschillende niveau's zijn voor laden. Al deze dingen beginnen echter met een simpele vraag: Hoe lang wordt er geladen? Dit is belangrijk om te weten en te verklaren wat de rest van de data ons zegt.")
 
@@ -91,7 +90,6 @@ fig = px.scatter(
     x="charging_duration",
     y="energy_delivered [kWh]",
     color="N_phases",
-    category_orders={"N_phases": phase_order},
     color_discrete_map=phase_colors,
     title=f"Charging Duration vs Energy Delivered ({scatter_start:.1f} - {scatter_end:.1f} hours)",
     labels={
@@ -124,7 +122,6 @@ fig = px.scatter(
     y="max_charging_power [kW]",
     color="N_phases",
     color_discrete_map=phase_colors,
-    category_orders={"N_phases": phase_order},
     title="Energy Delivered vs Max Charging Power",
     labels={
         "energy_delivered [kWh]": "Energy Delivered [kWh]",
@@ -167,7 +164,6 @@ fig = px.histogram(
     filtered_eff,
     x="efficiency_percent",
     color="N_phases",
-    category_orders={"N_phases": phase_order},
     nbins=50,
     barmode="relative",
     title=f"Charging Efficiency Distribution by Phases ({eff_start:.0f}% – {eff_end:.0f}%)",
@@ -237,7 +233,6 @@ fig = px.scatter(
     x="efficiency_percent",
     y="wasted_energy",
     color="N_phases",
-    category_orders={"N_phases": phase_order},
     color_discrete_map=phase_colors,
     title=f"Wasted Energy vs Efficiency ({eff_start2:.0f}% – {eff_end2:.0f}%)",
     labels={
@@ -311,6 +306,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
