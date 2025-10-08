@@ -7,9 +7,6 @@ Created on Mon Oct  6 22:54:53 2025
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import seaborn as sb
 import streamlit as st
 import plotly.express as px
 
@@ -150,7 +147,7 @@ eff_start, eff_end = st.slider(
     min_value=min_eff,
     max_value=max_eff,
     value=(min_eff, max_eff),
-    step=1.0,
+    step=1,
 )
 filtered_eff = cd[
     (cd["efficiency_percent"] >= eff_start)
@@ -303,3 +300,4 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
