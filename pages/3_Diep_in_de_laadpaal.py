@@ -16,7 +16,7 @@ cd = pd.read_csv("data/Charging_data.csv")
 cd["charging_duration"] = pd.to_timedelta(cd["charging_duration"])
 cd.sort_values("charging_duration", axis=0, inplace=True)
 cd["charging_duration"] = cd["charging_duration"].dt.total_seconds() / 3600
-cd["N_phases"] = cd["N_phases"].astype("Int64").astype(str)
+cd["N_phases"] = cd["N_phases"].astype("Int64").astype(str),categories=[str(p) for p in [1,2,3]]
 
 min_duration = float(cd["charging_duration"].min())
 max_duration = float(cd["charging_duration"].max())
@@ -91,6 +91,7 @@ fig = px.scatter(
     y="energy_delivered [kWh]",
     color="N_phases",
     color_discrete_map=phase_colors,
+    category_orders={"N_phases": ["1","2","3"]},
     title=f"Charging Duration vs Energy Delivered ({scatter_start:.1f} - {scatter_end:.1f} hours)",
     labels={
         "charging_duration": "Charging Duration [hours]",
@@ -122,6 +123,7 @@ fig = px.scatter(
     y="max_charging_power [kW]",
     color="N_phases",
     color_discrete_map=phase_colors,
+    category_orders={"N_phases": ["1","2","3"]},
     title="Energy Delivered vs Max Charging Power",
     labels={
         "energy_delivered [kWh]": "Energy Delivered [kWh]",
@@ -234,6 +236,7 @@ fig = px.scatter(
     y="wasted_energy",
     color="N_phases",
     color_discrete_map=phase_colors,
+    category_orders={"N_phases": ["1","2","3"]},
     title=f"Wasted Energy vs Efficiency ({eff_start2:.0f}% – {eff_end2:.0f}%)",
     labels={
         "efficiency_percent": "Efficiency [%]",
@@ -306,6 +309,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
