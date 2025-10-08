@@ -33,7 +33,7 @@ st.write("Er zijn diverse onderdelen waarnaar gekeken kan worden, zoals wanneer 
 st.write("In de plot hieronder is een distributie weergegeven hoe lang er aan een laadpaal geladen is. Door deze distributie te analyseren, is te achterhalen hoe goed mensen in het algemeen laden en hoeveel energie ze verbruiken.")
 
 start, end = st.slider(
-    "Select charging duration range (hours):",
+    "Selecteer de laadduur range (uren):",
     min_value=min_duration,
     max_value=max_duration,
     value=(min_duration, max_duration),
@@ -45,17 +45,18 @@ fig = px.histogram(
     filtered,
     x="charging_duration",
     nbins=50,
-    title=f"Charging Duration Histogram ({start:.1f} - {end:.1f} hours)",
-    labels={"charging_duration": "Charging Duration [hours]"},
+    title=f"Verdeling Laadduur ({start:.1f} - {end:.1f} uur)",
+    labels={"charging_duration": "Laadduur [uren]"},
 )
 
 fig.update_layout(
     bargap=0.05,
-    xaxis=dict(title="Charging Duration [hours]"),
-    yaxis=dict(title="Frequency"),
+    xaxis=dict(title="Laadduur [uren]"),
+    yaxis=dict(title="Frequentie"),
     template="plotly_white"
 )
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 st.write("In de plot hieronder is gekeken naar de hoeveelheid gebruikte energie over de tijd die een auto aan de lader heeft gezeten. Hierbij is ook onderscheid gemaakt tussen het aantal fases waarop geladen wordt. Het aantal fases is een mate voor hoeveel stroom er door de kabels kan, door er meer stroomkabels aan toe te voegen.")
@@ -67,12 +68,12 @@ unique_phases = sorted(cd["N_phases"].dropna().unique())
 selected_phases = []
 cols = st.columns(len(unique_phases))
 for i, phase in enumerate(unique_phases):
-    if cols[i].checkbox(f"{int(phase)} phases", value=True):
+    if cols[i].checkbox(f"{int(phase)} fasen", value=True):
         selected_phases.append(phase)
 
-st.markdown("### Select range for charging duration in scatter plot")
+st.markdown("### Selecteer de range voor laadduur in de scatterplot")
 scatter_start, scatter_end = st.slider(
-    "Adjust x-axis range [hours]:",
+    "Pas de x-as aan (uren):",
     min_value=min_duration,
     max_value=max_duration,
     value=(min_duration, max_duration),
@@ -93,11 +94,11 @@ fig = px.scatter(
     color="N_phases",
     color_discrete_map=phase_colors,
     category_orders={"N_phases": ["1","2","3"]},
-    title=f"Charging Duration vs Energy Delivered ({scatter_start:.1f} - {scatter_end:.1f} hours)",
+    title=f"Laadduur vs Geleverde Energie ({scatter_start:.1f} - {scatter_end:.1f} uur)",
     labels={
-        "charging_duration": "Charging Duration [hours]",
-        "energy_delivered [kWh]": "Energy Delivered [kWh]",
-        "N_phases": "Number of Phases"
+        "charging_duration": "Laadduur [uren]",
+        "energy_delivered [kWh]": "Geleverde Energie [kWh]",
+        "N_phases": "Aantal Fasen"
     },
 )
 fig.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=0.5, color="black")))
@@ -110,11 +111,11 @@ st.write("In deze scatterplot wordt (op een aparte manier) de efficiëntie berek
 st.write("De reden waarom niet alles op dezelfde lijn zit, is omdat een auto laden dynamisch werkt. Als het kan, wordt de maximale hoeveelheid stroom geleverd, maar naarmate de accu vol raakt, zal de mate van laden steeds verder af nemen. Er is ook voor gekozen om geen weergave te maken van hoe lang elk punt laadt, om overzichtelijkheid te behouden.")
 
 unique_phases_3 = sorted(cd["N_phases"].dropna().unique())
-st.markdown("**Select which N_phases to display for this plot:**")
+st.markdown("**Selecteer welke N_fasen weergegeven moeten worden:**")
 cols3 = st.columns(len(unique_phases_3))
 selected_phases_3 = []
 for i, phase in enumerate(unique_phases_3):
-    if cols3[i].checkbox(f"{int(phase)} phases", value=True, key=f"phase3_{i}"):
+    if cols3[i].checkbox(f"{int(phase)} fasen", value=True, key=f"phase3_{i}"):
         selected_phases_3.append(phase)
 
 filtered3 = cd[cd["N_phases"].isin(selected_phases_3)]
@@ -125,11 +126,11 @@ fig = px.scatter(
     color="N_phases",
     color_discrete_map=phase_colors,
     category_orders={"N_phases": ["1","2","3"]},
-    title="Energy Delivered vs Max Charging Power",
+    title="Geleverde Energie vs Maximale Laadstroom",
     labels={
-        "energy_delivered [kWh]": "Energy Delivered [kWh]",
-        "max_charging_power [kW]": "Max Charging Power [kW]",
-        "N_phases": "Number of Phases"
+        "energy_delivered [kWh]": "Geleverde Energie [kWh]",
+        "max_charging_power [kW]": "Maximale Laadstroom [kW]",
+        "N_phases": "Aantal Fasen"
     },
 )
 fig.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=0.5, color="black")))
@@ -148,19 +149,16 @@ cd["max_charge_gotten"] = cd["charging_duration"] * cd["max_charging_power [kW]"
 cd["efficiency"] = cd["energy_delivered [kWh]"] / cd["max_charge_gotten"]
 cd["efficiency_percent"] = cd["efficiency"] * 100
 
-min_eff = 0
-max_eff = 100
-
 eff_start, eff_end = st.slider(
-    "Select efficiency range (%):",
-    min_value=min_eff,
-    max_value=max_eff,
-    value=(min_eff, max_eff),
+    "Selecteer het efficiëntiebereik (%):",
+    min_value=0,
+    max_value=100,
+    value=(0, 100),
     step=1,
 )
 filtered_eff = cd[
-    (cd["efficiency_percent"] >= eff_start)
-    & (cd["efficiency_percent"] <= eff_end)
+    (cd["efficiency_percent"] >= eff_start) &
+    (cd["efficiency_percent"] <= eff_end)
 ]
 
 fig = px.histogram(
@@ -171,19 +169,19 @@ fig = px.histogram(
     category_orders={"N_phases": ["1","2","3"]},
     nbins=50,
     barmode="relative",
-    title=f"Charging Efficiency Distribution by Phases ({eff_start:.0f}% – {eff_end:.0f}%)",
+    title=f"Verdeling Laadefficiëntie per Fase ({eff_start}% – {eff_end}%)",
     labels={
-        "efficiency_percent": "Charging Efficiency [%]",
-        "N_phases": "Number of Phases",
-        "count": "Percentage of Total"
+        "efficiency_percent": "Efficiëntie [%]",
+        "N_phases": "Aantal Fasen",
+        "count": "Percentage van totaal"
     },
 )
 fig.update_layout(
     bargap=0.05,
-    xaxis=dict(title="Efficiency [%]"),
-    yaxis=dict(title="Frequency"),
+    xaxis=dict(title="Efficiëntie [%]"),
+    yaxis=dict(title="Frequentie"),
     template="plotly_white",
-    legend_title_text="N_phases"
+    legend_title_text="N_fasen"
 )
 st.plotly_chart(fig, use_container_width=True)
 
@@ -194,7 +192,7 @@ st.write("Hoe efficiënt iedere fase is, is ook op een andere manier te laten zi
 cd["wasted_energy"] = cd["max_charge_gotten"] - cd["energy_delivered [kWh]"]
 
 eff_start2, eff_end2 = st.slider(
-    "Select efficiency range for scatter plot (%):",
+    "Selecteer efficiëntiebereik voor scatterplot (%):",
     min_value=0.0,
     max_value=100.0,
     value=(0.0, 100.0),
@@ -202,14 +200,14 @@ eff_start2, eff_end2 = st.slider(
     key="eff_slider2"
 )
 
-remove_outliers = st.checkbox("Remove outliers (limit per N_phases)", value=False)
+remove_outliers = st.checkbox("Verwijder uitschieters", value=False)
 
 unique_phases_eff = sorted(cd["N_phases"].dropna().unique())
-st.markdown("**Select which N_phases to display:**")
+st.markdown("**Selecteer welke N_fasen weergegeven moeten worden:**")
 cols_eff = st.columns(len(unique_phases_eff))
 selected_phases_eff = []
 for i, phase in enumerate(unique_phases_eff):
-    if cols_eff[i].checkbox(f"{int(phase)} phases", value=True, key=f"eff2_phase_{i}"):
+    if cols_eff[i].checkbox(f"{int(phase)} fasen", value=True, key=f"eff2_phase_{i}"):
         selected_phases_eff.append(phase)
 
 filtered_eff2 = cd[
@@ -240,11 +238,11 @@ fig = px.scatter(
     color="N_phases",
     color_discrete_map=phase_colors,
     category_orders={"N_phases": ["1","2","3"]},
-    title=f"Wasted Energy vs Efficiency ({eff_start2:.0f}% – {eff_end2:.0f}%)",
+    title=f"Verspilde Energie vs Efficiëntie ({eff_start2:.0f}% – {eff_end2:.0f}%)",
     labels={
-        "efficiency_percent": "Efficiency [%]",
-        "wasted_energy": "Wasted Energy [kWh]",
-        "N_phases": "Number of Phases"
+        "efficiency_percent": "Efficiëntie [%]",
+        "wasted_energy": "Verspilde Energie [kWh]",
+        "N_phases": "Aantal Fasen"
     },
 )
 fig.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=0.5, color="black")))
@@ -255,6 +253,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.write("Naast de efficiëntie, kan er ook nog gekeken worden naar wanneer er op een dag geladen wordt en hoe vaak dat voor komt. In de onderstaande histogram wordt de mogelijkheid gegeven om de begintijd of de eindtijd te bekijken.")
 
+
 cd["month_start_time"] = cd["start_time"].dt.month_name()
 cd["month_exit_time"] = cd["exit_time"].dt.month_name()
 cd["hour_start_time"] = cd["start_time"].dt.hour
@@ -262,21 +261,21 @@ cd["hour_exit_time"] = cd["exit_time"].dt.hour
 
 hist_options = ["hour_start_time", "hour_exit_time"]
 hist_labels = {
-    "hour_start_time": "Hour of Start Time",
-    "hour_exit_time": "Hour of Exit Time"
+    "hour_start_time": "Uur van Begin Tijd",
+    "hour_exit_time": "Uur van Eind Tijd"
 }
-selected_hist = st.selectbox("Choose histogram:", options=hist_options, format_func=lambda x: hist_labels[x])
+selected_hist = st.selectbox("Kies histogram:", options=hist_options, format_func=lambda x: hist_labels[x])
 
 fig = px.histogram(
     cd,
     x=selected_hist,
     nbins=23,
-    title=f"{hist_labels[selected_hist]} Distribution",
+    title=f"Verdeling {hist_labels[selected_hist]}",
     labels={selected_hist: hist_labels[selected_hist]},
 )
 fig.update_layout(
     xaxis=dict(title=hist_labels[selected_hist]),
-    yaxis=dict(title="Frequency"),
+    yaxis=dict(title="Frequentie"),
     template="plotly_white",
     bargap=0.05
 )
@@ -294,36 +293,21 @@ sum_maanden_wasted = cd.groupby("month_exit_time")["wasted_energy"].sum()
 sum_maanden_wasted = sum_maanden_wasted.reindex(maanden)
 cd = cd.reset_index(drop=True)
 
-plot_options = ["Delivered Energy", "Wasted Energy"]
-selected_plot = st.selectbox("Select which monthly plot to display:", plot_options)
-if selected_plot == "Delivered Energy":
+plot_options = ["Geleverde Energie", "Verspilde Energie"]
+selected_plot = st.selectbox("Kies welk maandelijks plot weergegeven moet worden:", plot_options)
+if selected_plot == "Geleverde Energie":
     y_values = sum_maanden.values
-    y_label = "Energy Delivered [kWh]"
+    y_label = "Geleverde Energie [kWh]"
 else:
     y_values = sum_maanden_wasted.values
-    y_label = "Wasted Energy [kWh]"
+    y_label = "Verspilde Energie [kWh]"
 
 fig = px.line(
     x=maanden,
     y=y_values,
     markers=True,
-    title=f"{selected_plot} per Month",
-    labels={"x": "Month", "y": y_label}
+    title=f"{selected_plot} per Maand",
+    labels={"x": "Maand", "y": y_label}
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
