@@ -1,10 +1,12 @@
 import streamlit as st
 from kaggleapi import download_dataset
-
+from kaggleapi import download_kaarten
 
 st.title("Elektrische auto's in Nederland")
 
 download_dataset('gillesdegoeij/case3datasets')
+download_kaarten("https://github.com/groep3cases/case3/releases/download/v1/kaarten.zip")
+
 
 st.markdown("""
 In deze Streamlit-app wordt inzicht gegeven in de wereld van **elektrische voertuigen in Nederland**.  
