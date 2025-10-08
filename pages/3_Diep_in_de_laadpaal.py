@@ -20,6 +20,12 @@ cd["charging_duration"] = cd["charging_duration"].dt.total_seconds() / 3600
 min_duration = float(cd["charging_duration"].min())
 max_duration = float(cd["charging_duration"].max())
 
+phase_colors = {
+    1: "#ff7f0e",
+    2: "#d62728",
+    3: "#8c564b"
+}
+
 st.write("Er zijn diverse onderdelen waarnaar gekeken kan worden, zoals wanneer er geladen wordt, hoe veel er geladen wordt en wat de verschillende niveau's zijn voor laden. Al deze dingen beginnen echter met een simpele vraag: Hoe lang wordt er geladen? Dit is belangrijk om te weten en te verklaren wat de rest van de data ons zegt.")
 
 st.write("In de plot hieronder is een distributie weergegeven hoe lang er aan een laadpaal geladen is. Door deze distributie te analyseren, is te achterhalen hoe goed mensen in het algemeen laden en hoeveel energie ze verbruiken.")
@@ -83,7 +89,7 @@ fig = px.scatter(
     x="charging_duration",
     y="energy_delivered [kWh]",
     color="N_phases",
-    color_continuous_scale="plasma",
+    color_discrete_map=phase_colors,
     title=f"Charging Duration vs Energy Delivered ({scatter_start:.1f} - {scatter_end:.1f} hours)",
     labels={
         "charging_duration": "Charging Duration [hours]",
@@ -115,7 +121,7 @@ fig = px.scatter(
     x="energy_delivered [kWh]",
     y="max_charging_power [kW]",
     color="N_phases",
-    color_continuous_scale="plasma",
+    color_discrete_map=phase_colors,
     title="Energy Delivered vs Max Charging Power",
     labels={
         "energy_delivered [kWh]": "Energy Delivered [kWh]",
@@ -227,7 +233,7 @@ fig = px.scatter(
     x="efficiency_percent",
     y="wasted_energy",
     color="N_phases",
-    color_continuous_scale="plasma",
+    color_discrete_map=phase_colors,
     title=f"Wasted Energy vs Efficiency ({eff_start2:.0f}% – {eff_end2:.0f}%)",
     labels={
         "efficiency_percent": "Efficiency [%]",
@@ -300,4 +306,5 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
