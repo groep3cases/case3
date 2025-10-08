@@ -21,11 +21,11 @@ keuze = st.selectbox('Kies een kaart om te bekijken:',
                   "Kaart 5 -- Totaal"])
 
 kaarten = {
-        "Kaart 1 -- Personenauto's": "kaarten/Personenauto_kaart.html",
-        "Kaart 2 -- Bedrijfsauto's": "kaarten/Bedrijfsauto_kaart.html",
-        "Kaart 3 -- Motorfietsen": "kaarten/Motorfiets_kaart.html",
-        "Kaart 4 -- Bromfietsen": "kaarten/Bromfiets_kaart.html",
-        "Kaart 5 -- Totaal": "kaarten/totaal_kaart.html"}
+        "Kaart 1 -- Personenauto's": "kaarten/kaarten_old/Personenauto_kaart.html",
+        "Kaart 2 -- Bedrijfsauto's": "kaarten/kaarten_old/Bedrijfsauto_kaart.html",
+        "Kaart 3 -- Motorfietsen": "kaarten/kaarten_old/Motorfiets_kaart.html",
+        "Kaart 4 -- Bromfietsen": "kaarten/kaarten_old/Bromfiets_kaart.html",
+        "Kaart 5 -- Totaal": "kaarten/kaarten_old/totaal_kaart.html"}
 
 html_path = kaarten[keuze]
 with open(html_path, "r", encoding="utf-8") as f:
@@ -57,3 +57,4 @@ df_filtered['Percentage'] =  df_filtered['Aantal'] / df_filtered['aantal_inwoner
 df_sorted = df_filtered.sort_values("Percentage", ascending=False)
 st.subheader("Top 10 postcodes met het hoogste percentage elektrische personenauto’s (t.o.v. inwoners)")
 st.dataframe(df_sorted[['Postcode','Aantal','aantal_inwoners','Percentage']].head(10))
+
