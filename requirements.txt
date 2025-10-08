@@ -3,3 +3,4 @@ kaggle
 matplotlib
 geopandas
 seaborn
+plotly
