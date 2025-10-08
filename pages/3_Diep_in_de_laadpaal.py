@@ -100,7 +100,6 @@ fig = px.scatter(
         "N_phases": "Number of Phases"
     },
 )
-fig.for_each_trace(lambda t: t.update(marker_color=phase_colors.get(int(t.name), "#999999")))
 fig.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=0.5, color="black")))
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
@@ -133,7 +132,6 @@ fig = px.scatter(
         "N_phases": "Number of Phases"
     },
 )
-fig.for_each_trace(lambda t: t.update(marker_color=phase_colors.get(int(t.name), "#999999")))
 fig.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=0.5, color="black")))
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
@@ -186,7 +184,6 @@ fig.update_layout(
     template="plotly_white",
     legend_title_text="N_phases"
 )
-fig.for_each_trace(lambda t: t.update(marker_color=phase_colors.get(int(t.name), "#999999")))
 st.plotly_chart(fig, use_container_width=True)
 
 
@@ -249,7 +246,6 @@ fig = px.scatter(
         "N_phases": "Number of Phases"
     },
 )
-fig.for_each_trace(lambda t: t.update(marker_color=phase_colors.get(int(t.name), "#999999")))
 fig.update_traces(marker=dict(size=8, opacity=0.7, line=dict(width=0.5, color="black")))
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
@@ -315,6 +311,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
