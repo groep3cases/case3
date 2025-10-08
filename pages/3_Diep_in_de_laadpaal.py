@@ -25,7 +25,7 @@ max_duration = float(cd["charging_duration"].max())
 phase_colors = {
     1: "#ff7f0e",
     2: "#d62728",
-    3: "#8c564b"
+    3: "#1f77b4"
 }
 
 st.write("Er zijn diverse onderdelen waarnaar gekeken kan worden, zoals wanneer er geladen wordt, hoe veel er geladen wordt en wat de verschillende niveau's zijn voor laden. Al deze dingen beginnen echter met een simpele vraag: Hoe lang wordt er geladen? Dit is belangrijk om te weten en te verklaren wat de rest van de data ons zegt.")
@@ -310,6 +310,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
