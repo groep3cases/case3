@@ -16,7 +16,7 @@ cd = pd.read_csv("data/Charging_data.csv")
 cd["charging_duration"] = pd.to_timedelta(cd["charging_duration"])
 cd.sort_values("charging_duration", axis=0, inplace=True)
 cd["charging_duration"] = cd["charging_duration"].dt.total_seconds() / 3600
-cd["N_phases"] = cd["N_phases"].astype("Int64")
+cd["N_phases"] = cd["N_phases"].astype("Int64").astype(str)
 
 min_duration = float(cd["charging_duration"].min())
 max_duration = float(cd["charging_duration"].max())
@@ -180,7 +180,7 @@ fig = px.histogram(
 fig.update_layout(
     bargap=0.05,
     xaxis=dict(title="Efficiency [%]"),
-    yaxis=dict(title="Relative Frequency [%]"),
+    yaxis=dict(title="Frequency"),
     template="plotly_white",
     legend_title_text="N_phases"
 )
@@ -311,6 +311,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
