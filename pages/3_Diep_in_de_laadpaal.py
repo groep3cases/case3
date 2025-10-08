@@ -16,7 +16,8 @@ cd = pd.read_csv("data/Charging_data.csv")
 cd["charging_duration"] = pd.to_timedelta(cd["charging_duration"])
 cd.sort_values("charging_duration", axis=0, inplace=True)
 cd["charging_duration"] = cd["charging_duration"].dt.total_seconds() / 3600
-cd["N_phases"] = cd["N_phases"].astype("Int64").astype(str),categories=[str(p) for p in [1,2,3]]
+cd["N_phases"] = cd["N_phases"].astype("Int64").astype(str)
+cd["N_phases"] = pd.Categorical(cd["N_phases"], categories=[str(p) for p in [1, 2, 3]])
 
 min_duration = float(cd["charging_duration"].min())
 max_duration = float(cd["charging_duration"].max())
@@ -309,6 +310,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
