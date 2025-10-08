@@ -26,7 +26,7 @@ phase_colors = {
     2: "#d62728",
     3: "#8c564b"
 }
-phase_order = sorted(phase_colors.keys())
+phase_order = [1,2,3]
 
 st.write("Er zijn diverse onderdelen waarnaar gekeken kan worden, zoals wanneer er geladen wordt, hoe veel er geladen wordt en wat de verschillende niveau's zijn voor laden. Al deze dingen beginnen echter met een simpele vraag: Hoe lang wordt er geladen? Dit is belangrijk om te weten en te verklaren wat de rest van de data ons zegt.")
 
@@ -312,6 +312,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
