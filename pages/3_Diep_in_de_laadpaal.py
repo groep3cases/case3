@@ -167,6 +167,8 @@ fig = px.histogram(
     filtered_eff,
     x="efficiency_percent",
     color="N_phases",
+    color_discrete_map=phase_colors,
+    category_orders={"N_phases": ["1","2","3"]},
     nbins=50,
     barmode="relative",
     title=f"Charging Efficiency Distribution by Phases ({eff_start:.0f}% – {eff_end:.0f}%)",
@@ -310,6 +312,7 @@ fig = px.line(
 )
 fig.update_layout(template="plotly_white")
 st.plotly_chart(fig, use_container_width=True)
+
 
 
 
