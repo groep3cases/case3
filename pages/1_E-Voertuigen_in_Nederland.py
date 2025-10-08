@@ -85,9 +85,8 @@ st.write("""De bovenstaande visualisatie laat zien dat er in 2025 meer dan 1,5 m
             staan. Volgens officiële bronnen, zoals het CBS en de RVO, bedraagt het daadwerkelijke aantal volledig elektrische 
             personenauto’s echter ongeveer 600.000. Dit verschil ontstaat doordat de gebruikte RDW-dataset alle voertuigen bevat die 
             ooit in Nederland geregistreerd zijn, ongeacht of ze nog actief zijn. Hierdoor worden ook voertuigen meegeteld die inmiddels 
-            gesloopt, geëxporteerd of uitgeschreven zijn.
-
-            De grafiek toont daardoor niet het actuele aantal elektrische auto’s op de weg, maar een historisch totaal van alle voertuigen die ooit als elektrisch zijn geregistreerd.""")
+            gesloopt, geëxporteerd of uitgeschreven zijn. De grafiek toont daardoor niet het actuele aantal elektrische auto’s op de weg, 
+            maar een historisch totaal van alle voertuigen die ooit als elektrisch zijn geregistreerd.""")
 st.markdown("---")
 
 
@@ -140,4 +139,8 @@ fig_line.update_layout(
     yaxis_title="Gemiddelde catalogusprijs (€)"
 )
 st.plotly_chart(fig_line, use_container_width=True)
+st.write("""Om de dataset niet te groot te maken is er alleen gekeken naar data tussen 2015 en 2025. Dit
+            is een goede tijdsperiode omdat het verkoop van elektrische personenauto's in deze jaren hard
+            is gestegen.""")
+
 
