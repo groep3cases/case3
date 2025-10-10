@@ -46,7 +46,6 @@ with tab1:
     gdf = gpd.read_file("data/cbs_pc4_2024_v1.gpkg")[['postcode','aantal_inwoners']]
     df_merged = df.merge(gdf, left_on="Postcode", right_on="postcode", how="left")
 
-    # --- Sanity check: verwijder negatieve of te kleine inwoneraantallen ---
     df_merged = df_merged.copy()
     df_merged.loc[df_merged["aantal_inwoners"] < 0, "aantal_inwoners"] = None 
     df_merged = df_merged[df_merged["aantal_inwoners"] >= 1250]
@@ -361,3 +360,4 @@ with tab2:
              weer. Uit de figuur kan men concluderen dat in de provincie Zuid-Holland gemiddeld de laagste gebruikerskosten 
              voor een laadpaal heeft en in Limburg deze gemiddeld het hoogst zijn.""")
     st.markdown("---")
+
