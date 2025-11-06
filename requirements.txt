@@ -6,3 +6,4 @@ seaborn
 plotly
 pandas
 folium
+statsmodels
