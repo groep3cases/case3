@@ -4,30 +4,25 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 import folium
-from folium.plugins import MarkerCluster
 import re
 from branca.element import Template, MacroElement
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
 st.title('Regionale spreiding')
-st.write("""
-Hier wordt gekeken naar waar zicht laadpunten bevinden in Nederland en hoe elektrische voertuigen zijn verspreid door het land.
-""")
-
+st.write("""Hier wordt gekeken naar waar zicht laadpunten bevinden in Nederland en hoe 
+         de elektrische voertuigen zijn verspreid door het land.""")
 
 tab1, tab2 = st.tabs(["Voertuigen","Laadpalen"])
 
-
+# ----------------------- TAB 1 -----------------------
 with tab1:
 
-    st.write("""
-In de kaarten hieronder worden elektrische voertuigen die een geregistreerd kenteken hebben weergegeven. Er kan gefilterd
-worden op de belangrijkste soorten. De kenteken registratie postcode van de dataset is alleen gegeven als in het postcode gebied meer
-dan 10 dezelfde soort voertuigen geregistreerd zijn in verband met privacy. Kijk op de homepagina voor meer informatie over de volledige dataset.
-""")
+    st.write("""In de kaarten hieronder worden elektrische voertuigen die een geregistreerd kenteken hebben weergegeven. Er kan gefilterd
+            worden op de belangrijkste soorten. De kenteken registratie postcode van de dataset is alleen gegeven als in het postcode gebied meer
+            dan 10 dezelfde soort voertuigen geregistreed in verband met privacy. Houd er rekening dat de data is opgeschoond en grote uitschieters
+            zijn verwijderd uit de datasets. Kijk op de homepagina voor meer informatie over de volledige dataset.""")
 
     keuze = st.selectbox('Kies een kaart om te bekijken:',
                     ["Kaart 1 -- Personenauto's",
@@ -46,61 +41,40 @@ dan 10 dezelfde soort voertuigen geregistreerd zijn in verband met privacy. Kijk
     html_path = kaarten[keuze]
     with open(html_path, "r", encoding="utf-8") as f:
         html_data = f.read()
-    components.html(html_data, height=650)
 
-    
+    components.html(html_data, height=650, width=None)
+
     df = pd.read_csv("data/Brandstoffen_op_PC4_20251001.csv")
     gdf = gpd.read_file("data/cbs_pc4_2024_v1.gpkg")[['postcode','aantal_inwoners']]
     df_merged = df.merge(gdf, left_on="Postcode", right_on="postcode", how="left")
-    df_merged = df_merged.copy()
+
     df_merged.loc[df_merged["aantal_inwoners"] < 0, "aantal_inwoners"] = None 
     df_merged = df_merged[df_merged["aantal_inwoners"] >= 1250]
 
     df_filtered = df_merged[
-        (df_merged["Aantal"] <= df_merged["aantal_inwoners"]) &
+        (df_merged["Aantal"] <= df_merged["aantal_inwoners"]) & 
         (df_merged["Brandstof"] == "E") &
         (df_merged["Voertuigsoort"] == "Personenauto")
     ]
 
-   
     df_sorted = df_filtered.sort_values("Aantal", ascending=False)
-    top10_aantal = df_sorted.head(10)
+    st.subheader("Top 10 postcodes met de meeste elektrische personenauto’s")
+    st.dataframe(df_sorted[['Postcode','Aantal','aantal_inwoners']].head(10))
 
-    fig_top10 = px.bar(
-        top10_aantal,
-        x='Aantal',
-        y='Postcode',
-        orientation='h',
-        text='Aantal',
-        title='Top 10 postcodes met de meeste elektrische personenauto’s',
-        template='plotly_white'
-    )
-    fig_top10.update_layout(yaxis={'categoryorder':'total ascending'})
-    st.plotly_chart(fig_top10)
+    df_filtered['Percentage'] =  df_filtered['Aantal'] / df_filtered['aantal_inwoners'] * 100
+    df_sorted = df_filtered.sort_values("Percentage", ascending=False)
+    st.subheader("Top 10 postcodes met het hoogste percentage elektrische personenauto’s (t.o.v. inwoners)")
+    st.dataframe(df_sorted[['Postcode','Aantal','aantal_inwoners','Percentage']].head(10))
 
-    df_filtered = df_filtered.copy()
-    df_filtered['Percentage'] = df_filtered['Aantal'] / df_filtered['aantal_inwoners'] * 100
-    df_sorted_pct = df_filtered.sort_values("Percentage", ascending=False)
-    top10_pct = df_sorted_pct.head(10)
-
-    fig_pct = px.bar(
-        top10_pct,
-        x='Percentage',
-        y='Postcode',
-        orientation='h',
-        text='Percentage',
-        title='Top 10 postcodes met hoogste percentage elektrische personenauto’s',
-        template='plotly_white'
-    )
-    fig_pct.update_layout(yaxis={'categoryorder':'total ascending'})
-    st.plotly_chart(fig_pct)
-
-
+# ----------------------- TAB 2 -----------------------
 with tab2:
 
     data = pd.read_csv('data/OpenChargeMapNL.csv')
 
-  
+    # Controleer kolomnamen
+    st.write("Kolommen in CSV:", data.columns)
+
+    # Kosten extraheren
     def extract_cost(text):
         if pd.isna(text):
             return np.nan
@@ -116,7 +90,7 @@ with tab2:
             try:
                 value = float(match_fallback.group(1))
                 if 'ct' in text and value > 1:
-                    value = value / 100  
+                    value = value / 100
                 return value
             except ValueError:
                 return np.nan
@@ -126,7 +100,6 @@ with tab2:
     mediaan = data['ParsedCost'].median()
     data['FinalCost'] = data['ParsedCost'].fillna(mediaan)
 
-    
     def cost_category(cost):
         if cost == 0:
             return 'Niet bekend'
@@ -138,24 +111,42 @@ with tab2:
             return 'Zeer duur'
 
     data['CostCategory'] = data['FinalCost'].apply(cost_category)
-    kleur_mapping = {'Niet bekend':'grey','Goedkoop':'lightgreen','Duur':'orange','Zeer duur':'red'}
+    kleur_mapping = {'Niet bekend' : 'grey', 'Goedkoop': 'lightgreen', 'Duur': 'orange', 'Zeer duur': 'red'}
     data['Color'] = data['CostCategory'].map(kleur_mapping)
     data = data.dropna(subset=['AddressInfo.Latitude', 'AddressInfo.Longitude'])
 
-   
+    # Folium kaart maken
     m = folium.Map(location=[52.3702, 4.8952], zoom_start=8, tiles='OpenStreetMap')
-    cluster = MarkerCluster().add_to(m)
+
+    laag_nietbekend = folium.FeatureGroup(name='Niet bekend')
+    laag_goedkoop = folium.FeatureGroup(name='Goedkoop')
+    laag_duur = folium.FeatureGroup(name='Duur')
+    laag_zeer_duur = folium.FeatureGroup(name='Zeer duur')
+
     for _, row in data.iterrows():
-        tooltip_text = f"{row.get('AddressInfo.AddressLine1','Onbekend')} - €{row['FinalCost']:.2f}/kWh"
-        folium.CircleMarker(
+        tooltip_text = f"""
+        <strong>Locatie:</strong> {row.get('AddressInfo.AddressLine1', 'Onbekend')}<br>
+        <strong>Oorspronkelijke tekst:</strong> {row.get('UsageCost', 'n.v.t.')}<br>
+        <strong>Gebruikte prijs:</strong> €{row['FinalCost']:.2f}/kWh
+        """
+        marker = folium.CircleMarker(
             location=[row['AddressInfo.Latitude'], row['AddressInfo.Longitude']],
-            radius=5,
-            color=row['Color'],
-            fill=True,
-            fill_color=row['Color'],
-            fill_opacity=0.8,
+            radius=5, color=row['Color'], fill=True, fill_color=row['Color'], fill_opacity=0.8,
             tooltip=tooltip_text
-        ).add_to(cluster)
+        )
+        if row['CostCategory'] == 'Niet bekend':
+            marker.add_to(laag_nietbekend)
+        elif row['CostCategory'] == 'Goedkoop':
+            marker.add_to(laag_goedkoop)
+        elif row['CostCategory'] == 'Duur':
+            marker.add_to(laag_duur)
+        else:
+            marker.add_to(laag_zeer_duur)
+
+    laag_nietbekend.add_to(m)
+    laag_goedkoop.add_to(m)
+    laag_duur.add_to(m)
+    laag_zeer_duur.add_to(m)
 
     folium.LayerControl().add_to(m)
     m.save('kaarten/kaart1_case3.html')
@@ -163,49 +154,30 @@ with tab2:
         html_data = f.read()
     components.html(html_data, height=650)
 
-    st.write("""
-Hierboven is de kaart van Nederland weergegeven, waarbij de gebruikerskosten per oplaadpaal in euro per kilowattuur 
-worden weergegeven.
-""")
+    # ------------------- Prijs door de tijd -------------------
+    # Check of kolom bestaat
+    if "DateLastVerified" in data.columns and "UsageCost" in data.columns:
+        df_time = data.copy()
+        df_time['jaar'] = pd.to_datetime(df_time["DateLastVerified"], errors="coerce").dt.year
+        df_time['prijs'] = df_time["UsageCost"].str.extract(r"€\s?(\d+[.,]\d{2})")
+        df_time['prijs'] = df_time['prijs'].str.replace(",", ".").astype(float)
+        df_time = df_time.dropna(subset=['jaar','prijs'])
 
-   
-    df['jaar'] = pd.to_datetime(df["DateLastVerified"], errors="coerce").dt.year
-    df["prijs"] = df["UsageCost"].str.extract(r"€\s?(\d+[.,]\d{2})")[0]
-    df["prijs"] = df["prijs"].str.replace(",", ".").astype(float)
-    df_prijs_per_jaar = df[["jaar", "prijs"]].dropna()
+        fig = px.scatter(
+            df_time, x='jaar', y='prijs', title='Gebruikerskosten (€/kWh) door de tijd',
+            labels={'jaar': 'Jaar', 'prijs': 'Gebruikerskosten (€/kWh)'}, opacity=0.6
+        )
 
-    gemiddelde_per_jaar = df_prijs_per_jaar.groupby("jaar")["prijs"].mean().reset_index()
-
-    fig_time = px.scatter(df_prijs_per_jaar, x='jaar', y='prijs', opacity=0.6, labels={'jaar':'Jaar','prijs':'€/kWh'})
-    fig_time.add_scatter(x=gemiddelde_per_jaar['jaar'], y=gemiddelde_per_jaar['prijs'], mode='lines+markers', name='Gemiddelde', line=dict(color='red'))
-    fig_time.update_layout(title='Gebruikerskosten van laadpalen door de tijd')
-    st.plotly_chart(fig_time)
-
-    
-    data['AddressInfo.StateOrProvince'] = data['AddressInfo.StateOrProvince'].astype(str).str.strip()
-    provincie_mapping = {
-        'NH':'Noord-Holland','North-Holland':'Noord-Holland','North Holland':'Noord-Holland','Noord Holland':'Noord-Holland',
-        'ZH':'Zuid-Holland','South-Holland':'Zuid-Holland','South Holland':'Zuid-Holland','Zuid Holland':'Zuid-Holland',
-        'North Brabant':'Noord-Brabant','UT':'Utrecht','FRL':'Friesland','Frisia':'Friesland','Fryslân':'Friesland',
-        'Brussels':'Buitenland','Antwerp':'Buitenland','Berlin':'Buitenland','None':None,'nan':None
-    }
-    data['AddressInfo.StateOrProvince'] = data['AddressInfo.StateOrProvince'].replace(provincie_mapping)
-    data = data.dropna(subset=['AddressInfo.StateOrProvince', 'UsageCost'])
-    data['UsageCostClean'] = data['UsageCost'].apply(lambda x: float(re.sub(r'[^\d,.]', '', str(x)).replace(',', '.')) if re.search(r'\d', str(x)) else np.nan)
-    data = data.dropna(subset=['UsageCostClean'])
-
-    avg_costs = data.groupby('AddressInfo.StateOrProvince')['UsageCostClean'].mean().reset_index()
-    avg_costs = avg_costs.rename(columns={'AddressInfo.StateOrProvince':'Provincie','UsageCostClean':'GemiddeldeKosten'}).sort_values('GemiddeldeKosten')
-
-    fig_prov = px.bar(
-        avg_costs,
-        x='Provincie',
-        y='GemiddeldeKosten',
-        color='GemiddeldeKosten',
-        color_continuous_scale='viridis',
-        text='GemiddeldeKosten',
-        title='Gemiddelde gebruikerskosten van oplaadpalen per provincie (€/kWh)'
-    )
-    fig_prov.update_layout(xaxis_tickangle=-45)
-    st.plotly_chart(fig_prov)
-
+        gemiddelde_per_jaar = df_time.groupby("jaar")["prijs"].mean().reset_index()
+        fig2 = px.line(
+            gemiddelde_per_jaar, x='jaar', y='prijs', markers=True,
+            title='Gemiddelde gebruikerskosten (€/kWh) per jaar',
+            labels={'jaar':'Jaar','prijs':'Gemiddelde prijs per kWh (€)'},
+            template='plotly_white', line_shape='spline'
+        )
+        fig2.update_traces(fill="tozeroy")
+        fig2.update_layout(hovermode="x unified")
+        st.plotly_chart(fig)
+        st.plotly_chart(fig2)
+    else:
+        st.warning("Kolommen 'DateLastVerified' of 'UsageCost' ontbreken in de dataset, grafiek door de tijd kan niet worden weergegeven.")
