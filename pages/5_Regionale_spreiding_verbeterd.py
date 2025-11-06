@@ -1,6 +1,6 @@
 # ======================================================
-# 🧭 DASHBOARD - Regionale Spreiding van Elektrisch Vervoer in Nederland
-# Verbeterde versie met interactieve visualisaties en consistente stijl
+# 🚗 DASHBOARD - Regionale Spreiding van Elektrisch Vervoer in Nederland
+# Verbeterde versie met GeoDataFrame-fix + interactieve visualisaties
 # ======================================================
 
 import streamlit as st
@@ -48,17 +48,38 @@ with tab1:
         ["Personenauto", "Bedrijfsauto", "Motorfiets", "Bromfiets"]
     )
 
-    # Data inladen
+    # ------------------------------------------------------
+    # Data inladen en corrigeren GeoDataFrame
+    # ------------------------------------------------------
     df = pd.read_csv("data/Brandstoffen_op_PC4_20251001.csv")
-    gdf = gpd.read_file("data/cbs_pc4_2024_v1.gpkg")[['postcode', 'aantal_inwoners']]
+
+    # GeoDataFrame inladen (met geometrie behouden!)
+    gdf = gpd.read_file("data/cbs_pc4_2024_v1.gpkg")
+
+    # Kolomnamen checken
+    if 'postcode' not in gdf.columns:
+        if 'PC4' in gdf.columns:
+            gdf = gdf.rename(columns={'PC4': 'postcode'})
+        elif 'pc4' in gdf.columns:
+            gdf = gdf.rename(columns={'pc4': 'postcode'})
+
+    # Zorg dat benodigde kolommen aanwezig zijn
+    gdf = gdf[['postcode', 'aantal_inwoners', 'geometry']]
+
+    # GeoJSON voor kaart
     geojson_json = json.loads(gdf.to_crs("EPSG:4326").to_json())
 
-    # Merge en filtering
+    # Merge datasets
     df_merged = df.merge(gdf, left_on="Postcode", right_on="postcode", how="left")
-    df_merged = df_merged[df_merged["aantal_inwoners"] >= 1250]
-    df_merged = df_merged[(df_merged["Brandstof"] == "E") & (df_merged["Voertuigsoort"] == keuze)]
 
-    # Bereken percentage
+    # Filter data
+    df_merged = df_merged[df_merged["aantal_inwoners"] >= 1250]
+    df_merged = df_merged[
+        (df_merged["Brandstof"] == "E") &
+        (df_merged["Voertuigsoort"] == keuze)
+    ]
+
+    # Bereken percentage EV's per inwoner
     df_merged["Percentage"] = df_merged["Aantal"] / df_merged["aantal_inwoners"] * 100
 
     # ------------------------------------------------------
