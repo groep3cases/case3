@@ -49,7 +49,7 @@ future_pred = a * future_years + b
 future_pred = np.clip(future_pred, 0, None)
 
 fig_bar = go.Figure()
-fig_bar.add_trace(go.Bar(x=filtered_df["jaar"], y=filtered_df["aantal"], name="Echt", marker_color="cornflowerblue"))
+fig_bar.add_trace(go.Bar(x=filtered_df["jaar"], y=filtered_df["aantal"], name="Nieuwe elektrische auto's", marker_color="cornflowerblue"))
 fig_bar.add_trace(go.Bar(x=future_years, y=future_pred, name="Voorspelling (+3 jaar)", marker_color="lightgray"))
 ymax_bar = max(filtered_df["aantal"].max(), (future_pred.max() if len(future_pred) else 0))
 xmax_bar = future_years[-1] if len(future_years) else int(filtered_df["jaar"].max())
