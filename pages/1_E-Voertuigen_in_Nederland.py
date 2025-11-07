@@ -35,7 +35,7 @@ trend_df = trend_df.sort_values("jaar")
 
 jaar_range = st.slider(
     "Selecteer het jaarbereik:",
-    min_value=1951,
+    min_value=2000,
     max_value=2025,
     value=(2000, 2025),
     step=1
@@ -142,5 +142,6 @@ st.plotly_chart(fig_line, use_container_width=True)
 st.write("""Om de dataset niet te groot te maken is er alleen gekeken naar data tussen 2015 en 2025. Dit
             is een goede tijdsperiode omdat het verkoop van elektrische personenauto's in deze jaren hard
             is gestegen.""")
+
 
 
